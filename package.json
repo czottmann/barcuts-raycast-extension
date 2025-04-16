@@ -14,20 +14,33 @@
       "name": "active-shortcuts-workflows",
       "title": "Active Shortcuts workflows",
       "description": "",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "list",
-          "placeholder": "list",
-          "type": "text"
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "global-shortcuts-workflows",
       "title": "Global Shortcuts workflows",
       "description": "",
-      "mode": "view"
+      "mode": "no-view"
+    },
+    {
+      "name": "tagged-shortcuts-workflows",
+      "title": "Tagged Shortcuts workflows",
+      "description": "Shows any workflows that are tagged in any way",
+      "mode": "no-view"
+    },
+    {
+      "name": "select",
+      "title": "Select workflow from list",
+      "description": "Internal command that is used by the other BarCuts commands",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "list",
+          "placeholder": "list",
+          "required": true,
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {
