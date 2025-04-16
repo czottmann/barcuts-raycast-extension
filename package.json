@@ -14,7 +14,14 @@
       "name": "active-shortcuts-workflows",
       "title": "Active Shortcuts workflows",
       "description": "",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "list",
+          "placeholder": "list",
+          "type": "text"
+        }
+      ]
     },
     {
       "name": "global-shortcuts-workflows",

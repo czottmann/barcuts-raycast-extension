@@ -1,32 +1,63 @@
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { LaunchProps, List, open, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { exec } from "child_process";
 
-const ITEMS = Array.from(Array(3).keys()).map((key) => {
-  return {
-    id: key,
-    icon: Icon.Bird,
-    title: "Title " + key,
-    subtitle: "Subtitle",
-    accessory: "Accessory",
-  };
-});
+const commandUri =
+  "raycast://extensions/czottmann/barcuts-companion/active-shortcuts-workflows";
 
-export default function Command() {
+type Arguments = {
+  list: string;
+};
+
+export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+  const [items, setItems] = useState<{ id: number; title: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!props.arguments?.list || props.arguments?.list === "") {
+      console.log("No list provided, calling BarCuts");
+
+      // TODO: Call BarCuts but **ONLY** when it returns the correct format, e.g.
+      // `?arguments=%7B%22list%22%3A%22%5B%5D%22%7D`
+      const barcutsUri = `barcuts-dev://raycast/workflows/active` +
+        `?x-success=${encodeURIComponent(commandUri)}` +
+        `&x-error=${encodeURIComponent(commandUri)}`;
+      exec(`open --background '${barcutsUri}'`);
+    }
+  }, [props.arguments]);
+
+  useEffect(() => {
+    if (
+      typeof props.arguments?.list === "string" &&
+      props.arguments?.list !== ""
+    ) {
+      console.log("List received");
+
+      try {
+        const list = JSON.parse(
+          decodeURIComponent(props.arguments.list),
+        ) as string[];
+        setItems(list.map((item, index) => ({ id: index, title: item })));
+        setLoading(false);
+      } catch (error) {
+        if (error instanceof Error) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to parse list",
+            message: error.message,
+          });
+        }
+      }
+    }
+  }, [props.arguments]);
+
+  if (loading) {
+    return <List isLoading={true} />;
+  }
+
   return (
     <List>
-      {ITEMS.map((item) => (
-        <List.Item
-          key={item.id}
-          icon={item.icon}
-          title={item.title}
-          subtitle={item.subtitle}
-          accessories={[{ icon: Icon.Text, text: item.accessory }]}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={item.title} />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {items.map((item) => <List.Item key={item.id} title={item.title} />)}
     </List>
   );
 }
