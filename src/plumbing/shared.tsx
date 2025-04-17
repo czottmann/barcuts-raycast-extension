@@ -1,11 +1,26 @@
-import { LaunchProps, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Icon,
+  LaunchProps,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { createDeeplink, runAppleScript } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { exec } from "child_process";
-import { WorkflowsPayload, WorkflowType } from "./types.d";
+import {
+  ListWorkflowItem,
+  Workflow,
+  WorkflowsPayload,
+  WorkflowType,
+} from "./types.d";
 
 export function generateCommand(workflowType: WorkflowType) {
   return function (props: LaunchProps<{ arguments: WorkflowsPayload }>) {
-    const [items, setItems] = useState<{ id: number; title: string }[]>([]);
+    const [items, setItems] = useState<ListWorkflowItem[]>([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -21,8 +36,14 @@ export function generateCommand(workflowType: WorkflowType) {
       }
 
       try {
-        const list = JSON.parse(decodeURIComponent(args.list)) as string[];
-        setItems(list.map((item, index) => ({ id: index, title: item })));
+        const list = JSON.parse(decodeURIComponent(args.list)) as Workflow[];
+        setItems(
+          list.map((item, idx) => ({
+            id: idx,
+            title: item[0],
+            workflowID: item[1],
+          })),
+        );
         setLoading(false);
       } catch (error) {
         if (error instanceof Error) {
@@ -41,7 +62,35 @@ export function generateCommand(workflowType: WorkflowType) {
 
     return (
       <List>
-        {items.map((item) => <List.Item key={item.id} title={item.title} />)}
+        {items.map((item) => (
+          <List.Item
+            key={item.id}
+            title={item.title}
+            actions={
+              <ActionPanel>
+                <Action
+                  icon={Icon.Play}
+                  title="Run Workflow"
+                  onAction={() => {
+                    closeMainWindow();
+                    runAppleScript(`
+                      tell application "Shortcuts Events"
+                        ignoring application responses
+                          run shortcut id "${item.workflowID}"
+                        end ignoring
+                      end tell
+                    `);
+                  }}
+                />
+                <Action.OpenInBrowser
+                  icon={Icon.Pencil}
+                  title="Open in Shortcuts Editor"
+                  url={`shortcuts://open-shortcut?id=${item.workflowID}`}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List>
     );
   };
@@ -49,7 +98,7 @@ export function generateCommand(workflowType: WorkflowType) {
 
 function callBarCuts(type: WorkflowType) {
   const callbackURI = encodeURIComponent(
-    `raycast://extensions/czottmann/barcuts-companion/${type}-workflows`,
+    createDeeplink({ command: `${type}-workflows` }),
   );
   const barcutsURI = `barcuts://raycast/workflows/${type}` +
     `?x-success=${callbackURI}` +
