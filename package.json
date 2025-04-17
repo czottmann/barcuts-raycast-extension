@@ -12,33 +12,40 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "active-shortcuts-workflows",
+      "name": "active-workflows",
       "title": "Get Active Shortcuts Workflows",
       "description": "Returns list of workflows you've tagged as relevant to the currently active app",
-      "mode": "no-view"
-    },
-    {
-      "name": "global-shortcuts-workflows",
-      "title": "Get Global Shortcuts Workflows",
-      "description": "Returns list of workflows that you've tagged as always available",
-      "mode": "no-view"
-    },
-    {
-      "name": "tagged-shortcuts-workflows",
-      "title": "Get All Tagged Shortcuts Workflows",
-      "description": "Shows any workflows that you've tagged in any way",
-      "mode": "no-view"
-    },
-    {
-      "name": "select",
-      "title": "Select Workflow from List",
-      "description": "Internal command used by the other BarCuts commands, DO NOT DISABLE",
       "mode": "view",
       "arguments": [
         {
           "name": "list",
           "placeholder": "list",
-          "required": true,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "global-workflows",
+      "title": "Get Global Shortcuts Workflows",
+      "description": "Returns list of workflows that you've tagged as always available",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "list",
+          "placeholder": "list",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "tagged-workflows",
+      "title": "Get All Tagged Shortcuts Workflows",
+      "description": "Shows any workflows that you've tagged in any way",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "list",
+          "placeholder": "list",
           "type": "text"
         }
       ]
