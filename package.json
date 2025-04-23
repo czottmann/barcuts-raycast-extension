@@ -12,43 +12,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "active-workflows",
+      "name": "get-workflows",
       "title": "Get Active Shortcuts Workflows",
-      "description": "Returns list of workflows you've tagged as relevant to the currently active app",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "list",
-          "placeholder": "list",
-          "type": "text"
-        }
-      ]
-    },
-    {
-      "name": "global-workflows",
-      "title": "Get Global Shortcuts Workflows",
-      "description": "Returns list of workflows that you've tagged as always available",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "list",
-          "placeholder": "list",
-          "type": "text"
-        }
-      ]
-    },
-    {
-      "name": "tagged-workflows",
-      "title": "Get All Tagged Shortcuts Workflows",
-      "description": "Shows any workflows that you've tagged in any way",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "list",
-          "placeholder": "list",
-          "type": "text"
-        }
-      ]
+      "description": "Returns the workflows you've tagged as relevant to the currently active app, or as always available",
+      "mode": "view"
     }
   ],
   "dependencies": {
