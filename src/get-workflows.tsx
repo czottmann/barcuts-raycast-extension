@@ -11,7 +11,7 @@ import {
 import { runAppleScript, useExec } from "@raycast/utils";
 import { useMemo } from "react";
 import { execSync } from "child_process";
-import { CLIOutput } from "./types.d";
+import { CLIOutput, WorkflowItem } from "./types.d";
 
 let appPath: string | undefined;
 try {
@@ -51,17 +51,21 @@ export default function Command() {
   const { isLoading, data } = useExec(`${appPath}/Contents/MacOS/barcuts-cli`);
 
   // Parse BarCuts data
-  const bcData = useMemo<CLIOutput>(() => {
+  const workflows = useMemo<WorkflowItem[]>(() => {
     try {
-      return JSON.parse(data || "{}") || {};
+      const cliOutput: CLIOutput = JSON.parse(data || "{}") || {};
+      return [
+        ...cliOutput.activeWorkflows,
+        ...cliOutput.globalWorkflows?.map((wf) => ({ ...wf, isGlobal: true })),
+      ];
     } catch (e) {
-      console.error("Failed to parse workflows:", e);
+      console.error("Failed to parse BarCuts CLI output:", e);
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to load workflows",
+        title: "Failed to load workflow list",
         message: "Could not parse data from BarCuts CLI.",
       });
-      return {};
+      return [];
     }
   }, [data]);
 
@@ -72,12 +76,12 @@ export default function Command() {
   }
 
   // If there are no workflows to display, say so
-  if (!bcData.activeWorkflows?.length && !bcData.globalWorkflows?.length) {
+  if (!workflows.length) {
     return (
       <List searchBarPlaceholder="Search workflows…">
         <List.EmptyView
           title="No Workflows Found"
-          description={`Could not find any active workflows.`}
+          description="Could not find any active workflows."
         />
       </List>
     );
@@ -85,11 +89,12 @@ export default function Command() {
 
   // Display active & global workflows
   return (
-    <List searchBarPlaceholder="Search workflows...">
-      {bcData.activeWorkflows?.map((wf) => (
+    <List searchBarPlaceholder="Search workflows…">
+      {workflows.map((wf) => (
         <List.Item
           key={wf.workflowID}
           title={wf.fullTitle}
+          subtitle={wf.isGlobal ? "Global workflow" : undefined}
           actions={
             <ActionPanel>
               <Action
@@ -97,51 +102,21 @@ export default function Command() {
                 title="Run Workflow"
                 onAction={() => {
                   runAppleScript(`
-                        tell application "Shortcuts Events"
-                          ignoring application responses
-                            run shortcut id "${wf.workflowID}"
-                          end ignoring
-                        end tell
-                        `);
-                  disappearWindow();
+                    tell application "Shortcuts Events"
+                      ignoring application responses
+                        run shortcut id "${wf.workflowID}"
+                      end ignoring
+                    end tell
+                  `);
+                  closeMainWindow({ popToRootType: PopToRootType.Immediate });
                 }}
               />
               <Action.OpenInBrowser
                 icon={Icon.Pencil}
                 title="Open in Shortcuts Editor"
                 url={`shortcuts://open-shortcut?id=${wf.workflowID}`}
-                onOpen={() => disappearWindow()}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
-      {bcData.globalWorkflows?.map((wf) => (
-        <List.Item
-          key={wf.workflowID}
-          title={wf.fullTitle}
-          icon={Icon.Globe}
-          actions={
-            <ActionPanel>
-              <Action
-                icon={Icon.Play}
-                title="Run Workflow"
-                onAction={() => {
-                  runAppleScript(`
-                        tell application "Shortcuts Events"
-                          ignoring application responses
-                            run shortcut id "${wf.workflowID}"
-                          end ignoring
-                        end tell
-                        `);
-                  disappearWindow();
-                }}
-              />
-              <Action.OpenInBrowser
-                icon={Icon.Pencil}
-                title="Open in Shortcuts Editor"
-                url={`shortcuts://open-shortcut?id=${wf.workflowID}`}
-                onOpen={() => disappearWindow()}
+                onOpen={() =>
+                  closeMainWindow({ popToRootType: PopToRootType.Immediate })}
               />
             </ActionPanel>
           }
@@ -149,8 +124,4 @@ export default function Command() {
       ))}
     </List>
   );
-}
-
-function disappearWindow() {
-  closeMainWindow({ popToRootType: PopToRootType.Immediate });
 }

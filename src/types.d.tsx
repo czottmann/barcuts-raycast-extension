@@ -4,7 +4,8 @@ export type CLIOutput = {
   activeAppID: string;
 };
 
-type WorkflowItem = {
+export type WorkflowItem = {
   fullTitle: string;
   workflowID: string;
+  isGlobal: boolean;
 };
