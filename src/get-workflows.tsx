@@ -41,7 +41,7 @@ export default function Command() {
       <List searchBarPlaceholder="BarCuts not found …">
         <List.EmptyView
           title="BarCuts Is Not Installed"
-          icon={Icon.ExclamationMark}
+          icon={Icon.Warning}
         />
       </List>
     );
