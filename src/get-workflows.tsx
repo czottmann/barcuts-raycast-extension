@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  Icon,
-  List,
-  PopToRootType,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Icon, List, PopToRootType, showToast, Toast } from "@raycast/api";
 import { runAppleScript, useExec } from "@raycast/utils";
 import { useMemo } from "react";
 import { execSync } from "child_process";
@@ -15,11 +6,9 @@ import { CLIOutput, WorkflowItem } from "./types.d";
 
 let appPath: string | undefined;
 try {
-  appPath = execSync(
-    `/usr/bin/mdfind "kMDItemCFBundleIdentifier == 'co.zottmann.BarCuts'"`,
-    { encoding: "utf8" },
-  )
-    .trim();
+  appPath = execSync(`/usr/bin/mdfind "kMDItemCFBundleIdentifier == 'co.zottmann.BarCuts'"`, {
+    encoding: "utf8",
+  }).trim();
 
   if (!appPath) {
     console.warn("BarCuts CLI not found via mdfind.");
@@ -39,10 +28,7 @@ export default function Command() {
 
     return (
       <List searchBarPlaceholder="BarCuts not found …">
-        <List.EmptyView
-          title="BarCuts Is Not Installed"
-          icon={Icon.Warning}
-        />
+        <List.EmptyView title="BarCuts Is Not Installed" icon={Icon.Warning} />
       </List>
     );
   }
@@ -56,7 +42,10 @@ export default function Command() {
       const cliOutput: CLIOutput = JSON.parse(data || "{}") || {};
       return [
         ...cliOutput.activeWorkflows,
-        ...cliOutput.globalWorkflows?.map((wf) => ({ ...wf, isGlobal: true })),
+        ...(cliOutput.globalWorkflows || []).map((wf) => ({
+          ...wf,
+          isGlobal: true,
+        })),
       ];
     } catch (e) {
       console.error("Failed to parse BarCuts CLI output:", e);
@@ -70,19 +59,14 @@ export default function Command() {
   }, [data]);
 
   if (isLoading) {
-    return (
-      <List isLoading={true} searchBarPlaceholder="Loading workflows..." />
-    );
+    return <List isLoading={true} searchBarPlaceholder="Loading workflows…" />;
   }
 
   // If there are no workflows to display, say so
   if (!workflows.length) {
     return (
       <List searchBarPlaceholder="Search workflows…">
-        <List.EmptyView
-          title="No Workflows Found"
-          description="Could not find any active workflows."
-        />
+        <List.EmptyView title="No Workflows Found" description="Could not find any active workflows." />
       </List>
     );
   }
@@ -115,8 +99,7 @@ export default function Command() {
                 icon={Icon.Pencil}
                 title="Open in Shortcuts Editor"
                 url={`shortcuts://open-shortcut?id=${wf.workflowID}`}
-                onOpen={() =>
-                  closeMainWindow({ popToRootType: PopToRootType.Immediate })}
+                onOpen={() => closeMainWindow({ popToRootType: PopToRootType.Immediate })}
               />
             </ActionPanel>
           }
